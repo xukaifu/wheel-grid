@@ -19,7 +19,7 @@
               <img v-if="elem.img" :src="expr(elem.img, entry)" :width="elem.width" :height="elem.height"/>
               <span v-if="elem.text">{{ expr(elem.text, entry) }}</span>
             </a>
-            <span v-if="!elem.href">{{ expr(elem.text, entry) }}</span>
+            <span v-if="!elem.href && elem.text">{{ expr(elem.text, entry) }}</span>
           </span>
         </td>
       </tr>
