@@ -12,7 +12,7 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="entry in rows">
+      <tr v-for="entry in rows" @click="rowClick(entry)">
         <td v-for="col in columns">
           <span v-for="elem in col.elems">
             <a v-if="elem.href" :href="expr(elem.href, entry)" :target="elem.target">
@@ -44,18 +44,14 @@ export default {
       type: String,
       default: ''
     },
-    gridColumns: Array
+    gridColumns: Array,
+    rowClick: Function
   },
   data () {
     var sortOrders = {}
     var columns = []
     this.gridColumns.forEach(function (col) {
-      console.dir(col)
-      if (typeof col === 'string') {
-        columns.push({key: col, name: col, href: 'h', label: col.charAt(0).toUpperCase() + col.slice(1)})
-      } else {
-        columns.push(col)
-      }
+      columns.push(col)
       sortOrders[col.key] = 1
     })
     return {
@@ -66,8 +62,6 @@ export default {
       params: {results: 10, page: 1},
       columns: columns,
       expr: function (expr, obj) {
-        console.dir(expr)
-        console.dir(obj)
         return exprProp.expr(expr.replace(/{/g, '${'), obj)
       }
     }
@@ -81,22 +75,6 @@ export default {
   filters: {
     capitalize: function (str) {
       return str.charAt(0).toUpperCase() + str.slice(1)
-    },
-    datalize: function (str, entry, col) {
-      if (!col.filter) {
-        return str
-      }
-
-      switch (col.filter) {
-        case 'text':
-          return str
-      }
-      // value : text,  html,  number,  date,  img(size),
-      // value + href :  href(text, url),
-      // value + action, href?  : text_function(param),
-      // {href: [{value:'string or function', href:'string? or function' }], actions: [{value:'', function:'' }]}
-      // property computed: eval?
-      return col.key + '<a href="">href</a>' + str
     }
   },
   methods: {
