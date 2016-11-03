@@ -15,9 +15,11 @@
       <tr v-for="entry in rows">
         <td v-for="col in columns">
           <span v-for="elem in col.elems">
-            <a v-if="elem.href" :href="elem.href" :target="elem.target">
-              {{ entry[col.key] | datalize(entry, col) }}
+            <a v-if="elem.href" :href="expr(elem.href, entry)" :target="elem.target">
+              <img v-if="elem.img" :src="expr(elem.img, entry)" :width="elem.width" :height="elem.height"/>
+              <span v-if="elem.text">{{ expr(elem.text, entry) }}</span>
             </a>
+            <span v-if="!elem.href">{{ expr(elem.text, entry) }}</span>
           </span>
         </td>
       </tr>
@@ -31,6 +33,8 @@
 </template>
 
 <script>
+const exprProp = require('expr-prop')
+
 export default {
   name: 'x-grid',
   replace: true,
@@ -60,7 +64,12 @@ export default {
       rows: [],
       ver: 0,
       params: {results: 10, page: 1},
-      columns: columns
+      columns: columns,
+      expr: function (expr, obj) {
+        console.dir(expr)
+        console.dir(obj)
+        return exprProp.expr(expr.replace(/{/g, '${'), obj)
+      }
     }
   },
   created: function () {
@@ -99,7 +108,7 @@ export default {
       this.$http.get(this.dataUrl, {params: this.params}).then((response) => {
         this.rows = []
         response.data.results.forEach(item => {
-          this.rows.push({'dob': item['dob'], 'phone': item['phone']})
+          this.rows.push(item)
         })
       }, (response) => {
         // error callback

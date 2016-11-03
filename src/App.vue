@@ -1,4 +1,4 @@
-<template>
+<template type="text/x-template">
   <div id="app">
     <x-grid
       :data-url="'https://api.randomuser.me/'"
@@ -22,27 +22,27 @@ export default {
         {
           label: '姓名',
           elems: [
-            { type: 'text', text: '{name.first} {name.last}' },
-            { type: 'img', src: 'picture.thumbnail', width: '50', height: '50', href: '/users/{id}', target: '_blank' },
-            { type: 'link', href: '/users/{id}', target: '_blank' },
-            { type: 'event', event: 'warn', target: '_blank' }
+            { text: '{name.first} {name.last}' },
+            { img: '{picture.thumbnail}', width: '50', height: '50', href: '/users/{id.value}', target: '_blank' },
+            { href: '/users/{id.value}', target: '_blank' },
+            { event: 'warn', target: '_blank' }
           ]
         },
         {
           label: '手机',
           elems: [
-            { type: 'text', text: 'phont' },
-            { type: 'img', src: 'picture.thumbnail', width: '50', height: '50', href: '/users/{id}', target: '_blank' },
-            { type: 'link', href: '/users/{id}', target: '_blank' },
-            { type: 'event', event: 'warn', target: '_blank' }
+            { text: '{phone}' },
+            { img: '{picture.thumbnail}', width: '30', href: '/users/{id.value}', target: '_blank' },
+            { href: '/users/{id.value}', target: '_blank', text: '{name.first} {name.last}' },
+            { event: 'warn', target: '_blank' }
           ]
         }
       ]
     }
   },
-  created: {
+  method: {
     warn: function () {
-      console.log(1)
+      console.dir('xxx')
     }
   }
 }
