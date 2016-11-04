@@ -1,6 +1,6 @@
 <template type="text/x-template">
   <div id="app">
-    <input type="text" v-model="params.keyword"/>
+    <input type="text" :value="params.keyword" @keyup.enter="params.keyword = $event.target.value; params.page = 1"/>
     <x-grid
       :data-url="'https://api.randomuser.me/'"
       :columns="gridColumns"

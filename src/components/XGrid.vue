@@ -46,7 +46,7 @@
 </template>
 
 <script>
-const exprProp = require('expr-prop')
+import exprProp from 'expr-prop'
 
 export default {
   name: 'x-grid',
