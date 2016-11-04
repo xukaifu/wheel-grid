@@ -38,19 +38,22 @@
       </tr>
       </tbody>
     </table>
-    <ul>
-      <li @click="nextPage">Next</li>
-      <li @click="prevPage">Prev</li>
-    </ul>
+    <wheel-paging v-if="paging.total"
+      :paging="paging"
+      :params="params">
+    </wheel-paging>
   </div>
 </template>
 
 <script>
+import WheelPaging from './Paging'
 import exprProp from 'expr-prop'
 
 export default {
-  name: 'x-grid',
-  replace: true,
+  name: 'wheel-grid',
+  components: {
+    WheelPaging
+  },
   props: {
     dataUrl: String,
     filterKey: {
@@ -72,6 +75,7 @@ export default {
     })
     return {
       data: [],
+      count: 200,
       selected: null,
       sortKey: '',
       sortOrders: sortOrders,
@@ -81,6 +85,38 @@ export default {
           this.rowClick(obj)
         }
       } : null
+    }
+  },
+  computed: {
+    paging: function () {
+      if (this.count < 0) {
+        return {}
+      }
+
+      var total = this.count / this.params.per_page + (this.count % this.params.per_page === 0 ? 0 : 1)
+      if (this.params.page > total) {
+        this.params.page = total
+      }
+
+      var first = Math.max(1, this.params.page - 10 + 1)
+      var last = Math.min(total, this.params.page + 10 - 1)
+      if (last < first) {
+        last = first
+      }
+
+      while (last - first >= 10) {
+        if (this.params.page - first < last - this.params.page) {
+          last--
+        } else {
+          first++
+        }
+      }
+      return {
+        now: this.params.page,
+        first: first,
+        total: total,
+        last: last
+      }
     }
   },
   created: function () {
@@ -108,6 +144,7 @@ export default {
     fetchData: function () {
       this.$http.get(this.dataUrl, {params: this.params}).then((response) => {
         this.data = []
+        this.count = response.data.count ? response.data.count : 200
         response.data.results.forEach(item => {
           this.data.push(item)
         })
@@ -117,12 +154,6 @@ export default {
     },
     expr: function (expr, obj) {
       return expr ? exprProp.expr(expr.replace(/{/g, '${'), obj) : null
-    },
-    nextPage: function () {
-      this.params.page = this.params.page + 1
-    },
-    prevPage: function () {
-      this.params.page = this.params.page - 1
     }
   }
 }

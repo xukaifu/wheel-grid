@@ -1,23 +1,26 @@
 <template type="text/x-template">
   <div id="app">
-    <input type="text" :value="params.keyword" @keyup.enter="params.keyword = $event.target.value; params.page = 1"/>
-    <x-grid
-      :data-url="'https://api.randomuser.me/'"
+    <input type="text"
+           :value="params.keyword"
+           @keyup.enter="params.keyword = $event.target.value; params.page = 1"
+           placeholder="input keyword then type Enter"/>
+    <wheel-grid
+      :data-url="'https://api.randomuser.me/?results=5'"
       :columns="gridColumns"
       :params="params"
       :params-map="{'per_page': 'results', 'page': 'page', 'order_by': 'ob', 'keyword': 'k' }"
       :row-click="warn">
-    </x-grid>
+    </wheel-grid>
   </div>
 </template>
 
 <script>
-import XGrid from './components/XGrid'
+import WheelGrid from './components/Grid'
 
 export default {
   name: 'app',
   components: {
-    XGrid
+    WheelGrid
   },
   data () {
     return {
@@ -57,7 +60,7 @@ export default {
         }
       ],
       keyword: '',
-      params: {results: 10, page: 1, keyword: 'a', sort_key: '', sort_order: 1},
+      params: {per_page: 10, page: 2, keyword: 'a', sort_key: '', sort_order: 1},
       warn: function (obj) {
         console.dir('xxx')
         console.dir(obj)
