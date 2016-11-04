@@ -1,9 +1,11 @@
 <template type="text/x-template">
   <div id="app">
+    <input type="text" v-model="params.keyword"/>
     <x-grid
       :data-url="'https://api.randomuser.me/'"
-      :grid-columns="gridColumns"
-      :params-map="{'per_page': 'results', 'page': 'page' }"
+      :columns="gridColumns"
+      :params="params"
+      :params-map="{'per_page': 'results', 'page': 'page', 'order_by': 'ob', 'keyword': 'k' }"
       :row-click="warn">
     </x-grid>
   </div>
@@ -21,25 +23,41 @@ export default {
     return {
       gridColumns: [
         {
-          label: '姓名',
+          label: 'Text & Link',
+          sortKey: 'name',
           elems: [
             { text: '{name.first} {name.last}({id.value})' },
             { text: 'view', href: '/users/{id.value}', target: '_blank' }
           ]
         },
         {
-          label: '手机',
+          label: 'Event',
+          sortKey: 'age',
+          elems: [
+            { text: '{dob}', event: function (obj) { console.dir(obj) }, href: 'javascript:void' }
+          ]
+        },
+        {
+          label: 'Text',
           elems: [
             { text: '{phone}' }
           ]
         },
         {
-          label: '头像',
+          label: 'Image link',
           elems: [
             { img: '{picture.thumbnail}', width: '30', href: '/users/{id.value}', target: '_blank' }
           ]
+        },
+        {
+          label: 'Image',
+          elems: [
+            { img: '{picture.thumbnail}', width: '30' }
+          ]
         }
       ],
+      keyword: '',
+      params: {results: 10, page: 1, keyword: 'a', sort_key: '', sort_order: 1},
       warn: function (obj) {
         console.dir('xxx')
         console.dir(obj)

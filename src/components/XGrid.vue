@@ -4,23 +4,36 @@
       <thead>
       <tr>
         <th v-for="col in columns"
-            @click="sortBy(col.key)"
-            :class="{ active: sortKey == col.key }">
+            @click="col.sortKey && sortBy(col.sortKey)"
+            :class="{ active: sortKey == col.sortKey }">
           {{ col.label }}
-          <span class="arrow" :class="sortOrders[col.key] > 0 ? 'asc' : 'dsc'"></span>
+          <span v-show="col.sortKey" class="arrow" :class="sortOrders[col.sortKey] > 0 ? 'asc' : 'dsc'"></span>
         </th>
       </tr>
       </thead>
       <tbody>
-      <tr v-for="entry in rows" @click="rowClick(entry)">
+      <tr v-for="entry in data"
+          @click="rowClick && selectRow(entry)"
+          :class="{ selected: entry==selected }">
         <td v-for="col in columns">
-          <span v-for="elem in col.elems">
-            <a v-if="elem.href" :href="expr(elem.href, entry)" :target="elem.target">
+          <template v-for="elem in col.elems">
+            <a v-if="elem.event"
+               @click.prevent="elem.event && elem.event(entry)"
+               :href="elem.href && expr(elem.href, entry)">
               <img v-if="elem.img" :src="expr(elem.img, entry)" :width="elem.width" :height="elem.height"/>
               <span v-if="elem.text">{{ expr(elem.text, entry) }}</span>
             </a>
-            <span v-if="!elem.href && elem.text">{{ expr(elem.text, entry) }}</span>
-          </span>
+            <a v-if="elem.href && !elem.event"
+               :href="elem.href && expr(elem.href, entry)"
+               :target="elem.target">
+              <img v-if="elem.img" :src="expr(elem.img, entry)" :width="elem.width" :height="elem.height"/>
+              <span v-if="elem.text">{{ expr(elem.text, entry) }}</span>
+            </a>
+            <template v-if="!elem.href && !elem.event">
+              <img v-if="elem.img" :src="expr(elem.img, entry)" :width="elem.width" :height="elem.height"/>
+              <span v-else>{{ expr(elem.text, entry) }}</span>
+            </template>
+          </template>
         </td>
       </tr>
       </tbody>
@@ -44,26 +57,31 @@ export default {
       type: String,
       default: ''
     },
-    gridColumns: Array,
-    rowClick: Function
+    columns: Array,
+    params: Object,
+    rowClick: {
+      type: Function
+    }
   },
   data () {
     var sortOrders = {}
-    var columns = []
-    this.gridColumns.forEach(function (col) {
-      columns.push(col)
-      sortOrders[col.key] = 1
+    this.columns.forEach(col => {
+      if (col.sortKey) {
+        sortOrders[col.sortKey] = col.sortOrder ? col.sortOrder : 1
+      }
     })
     return {
+      ver: 0,
+      data: [],
+      selected: null,
       sortKey: '',
       sortOrders: sortOrders,
-      rows: [],
-      ver: 0,
-      params: {results: 10, page: 1},
-      columns: columns,
-      expr: function (expr, obj) {
-        return exprProp.expr(expr.replace(/{/g, '${'), obj)
-      }
+      selectRow: this.rowClick ? function (obj) {
+        this.selected = obj
+        if (this.rowClick) {
+          this.rowClick(obj)
+        }
+      } : null
     }
   },
   created: function () {
@@ -79,25 +97,31 @@ export default {
   },
   methods: {
     sortBy: function (key) {
+      this.sortOrders[key] = this.sortKey === key ? this.sortOrders[key] * -1 : this.sortOrders[key]
       this.sortKey = key
-      this.sortOrders[key] = this.sortOrders[key] * -1
+      this.params.sort_key = key
+      this.params.sort_order = this.sortOrders[key]
+      this.ver++
     },
     fetchData: function () {
       this.$http.get(this.dataUrl, {params: this.params}).then((response) => {
-        this.rows = []
+        this.data = []
         response.data.results.forEach(item => {
-          this.rows.push(item)
+          this.data.push(item)
         })
       }, (response) => {
         // error callback
       })
     },
+    expr: function (expr, obj) {
+      return expr ? exprProp.expr(expr.replace(/{/g, '${'), obj) : null
+    },
     nextPage: function () {
-      this.params['page'] = this.params['page'] + 1
+      this.params.page = this.params.page + 1
       this.ver++
     },
     prevPage: function () {
-      this.params['page'] = this.params['page'] - 1
+      this.params.page = this.params.page - 1
       this.ver++
     }
   }
@@ -111,6 +135,10 @@ export default {
   border: 2px solid #42b983;
   border-radius: 3px;
   background-color: #fff;
+}
+
+tr.selected td{
+  background-color: #eee;
 }
 
 th {
