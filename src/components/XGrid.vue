@@ -71,7 +71,6 @@ export default {
       }
     })
     return {
-      ver: 0,
       data: [],
       selected: null,
       sortKey: '',
@@ -88,7 +87,10 @@ export default {
     this.fetchData()
   },
   watch: {
-    ver: 'fetchData'
+    params: {
+      handler: 'fetchData',
+      deep: true
+    }
   },
   filters: {
     capitalize: function (str) {
@@ -101,7 +103,7 @@ export default {
       this.sortKey = key
       this.params.sort_key = key
       this.params.sort_order = this.sortOrders[key]
-      this.ver++
+      this.params.page = 1
     },
     fetchData: function () {
       this.$http.get(this.dataUrl, {params: this.params}).then((response) => {
@@ -118,11 +120,9 @@ export default {
     },
     nextPage: function () {
       this.params.page = this.params.page + 1
-      this.ver++
     },
     prevPage: function () {
       this.params.page = this.params.page - 1
-      this.ver++
     }
   }
 }
