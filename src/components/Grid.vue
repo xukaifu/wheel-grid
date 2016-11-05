@@ -92,12 +92,7 @@ export default {
       if (this.count < 0) {
         return {}
       }
-
       var total = this.count / this.params.per_page + (this.count % this.params.per_page === 0 ? 0 : 1)
-      if (this.params.page > total) {
-        this.params.page = total
-      }
-
       var first = Math.max(1, this.params.page - 10 + 1)
       var last = Math.min(total, this.params.page + 10 - 1)
       if (last < first) {
